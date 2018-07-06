@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="one">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .pagination {
+            width: 100%;
+            text-align: center;
+            padding: 12px 0;
+        }
+
+        .pageWrap {
+            display: inline-block;
+        }
+
+        .pagination span {
+            padding: 5px 12px;
+            margin: 0 5px;
+            border: 1px solid darkgray;
+        }
+
+        .pagination span:hover {
+            cursor: pointer;
+            border: 1px solid #2b81af;
+        }
+
+        span.currentPage {
+            border: 1px solid palevioletred;
+        }
+    </style>
+</head>
+<body>
+
+<div ng-controller="oneCtrl">
+     <pagination currentPage="currentPage" totalPage="totalPage"></pagination>
+
+     <pagination currentPage="currentPage" totalPage="totalPage"></pagination>
+</div>
+
+
+<script src="../jquery-3.3.1.js"></script>
+<script src="angular.js"></script>
+<script>
+    var one = angular.module("one", []);
+    one.controller("oneCtrl", function ($scope) {
+        $scope.currentPage = 7;
+        $scope.totalPage = 16;
+
+    });
+
+    one.directive("pagination", function () {
+        return {
+            restrict: "EA",
+            template: "<div>" +
+            "<div class='pagination'  ng-show='totalPage>=1'>" +
+            "<span class='pre'  ng-show='currentPage>1' ng-click='prePage()'>上一页</span>" +
+            "<div class='pageWrap' ng-click='jumpToThisPage($event)'></div>" +
+            "<span class='next' ng-show='currentPage<totalPage' ng-click='nextPage()'>下一页</span>" +
+            "</div>" +
+            "</div>",
+            scope:true,
+            link: function (scope,element) {
+
+                console.log(scope.totalPage,'--scope')
+
+                /*
+                 * 参数 说明
+                 * scope: scope对象
+                 * element  每次调用 link()方法时对应的指令标签（）
+                 *
+                 * */
+                var pageWrap =$(element).find(".pageWrap");
+
+                /*页码的渲染*/
+                renderPagination(scope.totalPage, scope.currentPage);
+
+                scope.prePage = function () {
+                    scope.currentPage = scope.currentPage - 1;
+                    if (scope.currentPage < 1) {
+                        scope.currentPage = 1;
+                    }
+                    renderPagination(scope.totalPage, scope.currentPage);
+                };
+
+                scope.nextPage = function () {
+                    scope.currentPage = scope.currentPage + 1;
+                    if (scope.currentPage > scope.totalPage) {
+                        scope.currentPage = scope.totalPage;
+                    }
+                    renderPagination(scope.totalPage, scope.currentPage)
+                };
+
+                scope.jumpToThisPage = function ($event) {
+                    /* 页码数 来自 span标签的内容，需要先去掉首尾空格，再转成number格式 */
+                    scope.currentPage = Number($($event.target).text().trim()) || 1;
+                    renderPagination(scope.totalPage, scope.currentPage)
+                };
+
+                function renderPagination(totalPage, currentPage) {
+                    var paginationHtml = "";
+                    var startPage, endPage, totalPage = totalPage, currentPage = currentPage;
+
+                    if (scope.totalPage <= 10) {
+                        startPage = 1;
+                        endPage = totalPage;
+                    } else if (totalPage > 10 && totalPage <= currentPage + 4) {
+                        endPage = totalPage;
+                        startPage = endPage - 9;
+                    } else if (totalPage > 10 && totalPage > currentPage + 4) {
+                        startPage = currentPage - 5;
+                        endPage = currentPage + 4;
+                        if (startPage < 1) {
+                            startPage = 1;
+                            endPage = startPage + 9;
+                        }
+                    }
+
+                    for (var i = startPage; i <= endPage; i++) {
+                        if (i == currentPage) {
+                            paginationHtml = paginationHtml + "<span class='currentPage'>" + i + "</span>"
+                        } else {
+                            paginationHtml = paginationHtml + "<span>" + i + "</span>"
+                        }
+                    }
+
+                    /*
+                     * 问题出现在这个pageWrap.html(paginationHtml) ,
+                     * 两次调用指令pagination ,根据指令已经currentPage totalpage 分别
+                     * 生成对应页码，但在页码渲染时，由于 此时页面上有两个 class 为  pageWrap的 元素，
+                     * 使用html()方法后两个元素的内容都替换成了最后一次
+                     * 生成的页码内容
+                     *
+                     * 所以，一开始时，即使在不同的controller中调用 自定义标签pagination ,最后的生成结果还是一样的
+                     *
+                     *
+                     * 解决方法： 在directive 的link 方法中使用element 参数，
+                     * 该参数 代表了 调用了了了该次 directive 方法的 指令标签元素
+                     *
+                     * */
+                    pageWrap.html(paginationHtml);
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
