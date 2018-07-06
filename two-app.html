@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h4>
+
+    一般情况下，单个页面中只有一个ng-app ，表示从此处开始 页面由angularjs接管，
+
+    想要在一个页面中 启动两个或两个以上的ng-app，从第二个ng-app 开始，需要手动启动
+
+
+</h4>
+
+<div ng-app="one">
+     <div ng-controller="oneCtrl">
+         hello {{ msg}}
+     </div>
+</div>
+
+<div id="two" ng-app="two">
+     <div ng-controller="twoCtrl">
+         他就是{{info}}
+     </div>
+</div>
+<script src="angular.js"></script>
+<script>
+    var one=angular.module("one",[]);
+    one.controller("oneCtrl",function($scope){
+        $scope.msg="姜小白";
+    });
+
+    var two=angular.module("two",[]);
+    two.controller("twoCtrl",function($scope){
+       $scope.info="苏亚雷斯";
+    });
+
+
+    /* 手动启动 第二个 ng-app ,
+     *
+      * 该语句放在最后面
+      * */
+    angular.bootstrap(document.getElementById("two"),["two"]);
+
+</script>
+</body>
+</html>
