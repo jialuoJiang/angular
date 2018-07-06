@@ -1,0 +1,10 @@
+关于pagination-new.html 的说明文件
+
+在之前的pagination.html页面中，已经通过组件实现了 页码 的功能
+
+pagination-new.html 要实现的目标是， 组件的复用，
+
+
+在改页面中，组件复用的实现方法是：
+
+定义不同的controller， 在 各个controller中 使用自定义指令
